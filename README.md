@@ -21,8 +21,8 @@ apm install language-puppet markdown-preview-plus sort-lines
 ```
 
 Before you configure your virtual LAMP machine, you need to pick some passwords
-for its database. Read the file
-`environments/vagrant/hiera/secrets_example.yaml` for instructions.
+for its database. Read the file [secrets_example.yaml](environments/vagrant/hiera/secrets_example.yaml)
+for instructions.
 
 To create a fresh virtual machine:
 ```
