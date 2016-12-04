@@ -1,0 +1,18 @@
+---
+
+#
+#  Packages that all RedHat (CentOS) servers should include.
+#
+lamp_config::packages::add:
+  - "epel-release"
+  - git
+  - deltarpm
+  - puppet
+  - yum-cron
+  - yum-utils
+
+#
+#  Who should receive mail sent to postmaster or root on this machine?
+#  Customize by overriding this default in hiera/private/<hostname>/secrets.yaml.
+#
+lamp_config::root_mail:            "postmaster@%{::domain}"

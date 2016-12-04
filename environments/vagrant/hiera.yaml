@@ -1,0 +1,11 @@
+---
+:backends:
+  - yaml
+
+:yaml:
+  :datadir: "environments/%{::environment}/hiera"
+
+:hierarchy:
+  - "private/%{::clientcert}/secrets"
+  - "%{::osfamily}"
+  - common
