@@ -19,16 +19,22 @@ class myphpapp (
 
   # 1. the base install
   exec {
-    $installdir:
+    "clone ${installdir}":
       require => Package['git'],
       command => "/usr/bin/git clone -b ${branch} ${repo} ${installdir}",
       creates => $installdir;
+
   } ->
   file {
     $installdir:
       owner => $owner,
       group => $group,
       recurse => true;
+  } ->
+  exec {
+    "pull ${installdir}":
+      command => 'cd ${installdir} && /usr/bin/git pull',
+      unless => 'test "`/usr/bin/git status -z`" = ""';
   }
 
   # 2. configuration and runtime
