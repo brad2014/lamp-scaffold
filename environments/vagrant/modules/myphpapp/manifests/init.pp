@@ -6,7 +6,10 @@ class myphpapp (
   $db_name = 'myphpapp',
   $db_host = 'localhost',
   $owner = 'apache',
-  $group = 'apache'
+  $group = 'apache',
+  $repo = 'https://www.github.com/brad2014/myphpapp.git',
+  $branch = 'master',
+  $installdir = '/usr/share/myphpapp',
 ){
   # install the files
   # typically:  source files in /usr/share/appname (readonly)
@@ -14,12 +17,18 @@ class myphpapp (
   # run time files (uploads) in /var/lib/appname  (updated during use)
   # log files in /var/log/appname/ (needs to be managed by logrotate)
 
-  # 1. the base install (could be a package from git. for this simple example, we just pull it from here)
+  # 1. the base install
+  exec {
+    $installdir:
+      require => Package['git'],
+      command => "/usr/bin/git clone -b ${branch} ${repo} ${installdir}",
+      creates => $installdir;
+  } ->
   file {
-    '/usr/share/myphpapp':
-      source => 'puppet:///modules/myphpapp/src',
-      recurse => true,
-      purge => true;
+    $installdir:
+      owner => $owner,
+      group => $group,
+      recurse => true;
   }
 
   # 2. configuration and runtime
@@ -32,7 +41,7 @@ class myphpapp (
       mode => '0770';
     '/etc/myphpapp/config.inc.php': # CONTAINS SECRETS
       content => template('myphpapp/config.inc.php');
-    '/usr/share/myphpapp/config':  # note: autorequires /usr/share/myphpapp
+    "${installdir}/config":  # note: autorequires /usr/share/myphpapp
       ensure => link,
       force => true,
       target => '../../../etc/myphpapp';
@@ -43,7 +52,7 @@ class myphpapp (
       owner => $owner,
       group => $group,
       mode => '0770';
-    '/usr/share/myphpapp/test':
+    "${installdir}/temp":
       ensure => link,
       force => true,
       target => '../../../var/lib/myphpapp';
@@ -54,7 +63,7 @@ class myphpapp (
       owner => $owner,
       group => $group,
       mode => '0770';
-    '/usr/share/myphpapp/logs':
+    "${installdir}/logs":
       ensure => link,
       force => true,
       target => '../../../var/log/myphpapp';
@@ -72,10 +81,10 @@ class myphpapp (
   # create the database
   ::mysql::db {
     $db_name:
-      require => File['/usr/share/myphpapp'],
+      require => File[$installdir],
       user => $db_username,
       password => $db_password,
-      sql => '/usr/share/myphpapp/SQL/schema.sql';
+      sql => "${installdir}/SQL/schema.sql";
   }
 
   # other things you might have
